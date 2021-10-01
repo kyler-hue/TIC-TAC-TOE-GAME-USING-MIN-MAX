@@ -1,5 +1,4 @@
-// C++ program to find the next optimal move for
-// a player
+
 #include<bits/stdc++.h>
 using namespace std;
 #define SIDE 3 
@@ -15,9 +14,7 @@ char board[3][3] =
 		{ '_', '_', '_' },
 		{ '_', '_', '_' }
 	};
-// This function returns true if there are moves
-// remaining on the board. It returns false if
-// there are no moves left to play.
+
 bool isMovesLeft(char board[3][3])
 {
 	for (int i = 0; i<3; i++)
@@ -84,9 +81,7 @@ bool rowCrossed(char board[][SIDE])
     }
     return(false);
 }
-  
-// A function that returns true if any of the column
-// is crossed with the same player's move
+
 bool columnCrossed(char board[][SIDE])
 {
     for (int i=0; i<SIDE; i++)
@@ -98,9 +93,7 @@ bool columnCrossed(char board[][SIDE])
     }
     return(false);
 }
-  
-// A function that returns true if any of the diagonal
-// is crossed with the same player's move
+
 bool diagonalCrossed(char board[][SIDE])
 {
     if (board[0][0] == board[1][1] &&
@@ -116,15 +109,14 @@ bool diagonalCrossed(char board[][SIDE])
     return(false);
 }
   
-// A function that returns true if the game is over
-// else it returns a false
+
 bool gameOver(char board[][3])
 {
     return(rowCrossed(board) || columnCrossed(board)
             || diagonalCrossed(board) );
 }
-// This is the evaluation function as discussed
-// in the previous article ( http://goo.gl/sJgv68 )
+
+
 int evaluate(char b[3][3])
 {
 	// Checking for Rows for X or O victory.
@@ -175,9 +167,7 @@ int evaluate(char b[3][3])
 	return 0;
 }
 
-// This is the minimax function. It considers all
-// the possible ways the game can go and returns
-// the value of the board
+
 int minimax(char board[3][3], int depth, bool isMax)
 {
 	int score = evaluate(board);
@@ -196,7 +186,8 @@ int minimax(char board[3][3], int depth, bool isMax)
 	// it is a tie
 	if (isMovesLeft(board)==false)
 		return 0;
-
+	if( depth == -1 )
+		return 0 ;
 	// If this maximizer's move
 	if (isMax)
 	{
@@ -215,8 +206,7 @@ int minimax(char board[3][3], int depth, bool isMax)
 
 					// Call minimax recursively and choose
 					// the maximum value
-					best = max( best,
-						minimax(board, depth+1, !isMax) );
+					best = max( best,minimax(board, depth-1, !isMax) );
 
 					// Undo the move
 					board[i][j] = '_';
@@ -239,14 +229,10 @@ int minimax(char board[3][3], int depth, bool isMax)
 				// Check if cell is empty
 				if (board[i][j]=='_')
 				{
-					// Make the move
+
 					board[i][j] = opponent;
 
-					// Call minimax recursively and choose
-					// the minimum value
-					best = min(best,
-						minimax(board, depth+1, !isMax));
-
+					best = min(best,minimax(board, depth-1, !isMax));
 					// Undo the move
 					board[i][j] = '_';
 				}
@@ -256,17 +242,15 @@ int minimax(char board[3][3], int depth, bool isMax)
 	}
 }
 
-// This will return the best possible move for the player
-Move findBestMove(char board[3][3])
+
+Move findBestMove(char board[3][3],int depth)
 {
 	int bestVal = -1000;
 	Move bestMove;
 	bestMove.row = -1;
 	bestMove.col = -1;
 
-	// Traverse all cells, evaluate minimax function for
-	// all empty cells. And return the cell with optimal
-	// value.
+
 	for (int i = 0; i<3; i++)
 	{
 		for (int j = 0; j<3; j++)
@@ -276,11 +260,11 @@ Move findBestMove(char board[3][3])
 			{
 				// Make the move
 				board[i][j] = player;
-
+				showBoard(board) ;
 				// compute evaluation function for this
 				// move.
-				int moveVal = minimax(board, 0, false);
-
+				int moveVal = minimax(board,  depth , false);
+				std::cout<<" The score is : " << moveVal << endl ;
 				// Undo the move
 				board[i][j] = '_';
 
@@ -310,13 +294,18 @@ int main()
 	//Move bestMove = findBestMove(board);
     int N = 9 ;
 
-	//printf("The Optimal Move is :\n");
-	//printf("ROW: %d COL: %d\n\n", bestMove.row,
-	//							bestMove.col );
+
     int flag = 1 ; // 0 for computer and 1 for user
     int k ;
 	showInstructions() ;
-	std::cout<<"If you want to move firs then enter 1 otherwise enter 0"<<endl ;
+	int depth = 0 ;
+	std::cout<<"Select your Level \n" ;
+	std::cout<<"0 ------> Easy\n" ;
+	std::cout<<"1 ------> Medium\n" ;
+	std::cout<<"2 ------> Hard\n" ;
+	std::cout<<"3 ------> Tough\n" ;
+	std::cin>>depth ;
+	std::cout<<"If you want to move first then enter 1 otherwise enter 0"<<endl ;
 	cin>>flag;
 	showBoard(board) ;
     while(N--)
@@ -324,13 +313,13 @@ int main()
         if( flag == 0 )
         {
 			
-            Move bestMove = findBestMove(board);
+            Move bestMove = findBestMove(board,depth);
             board[bestMove.row][bestMove.col] = player ;
-			std::cout<<"Computers move\t"<<endl;//bestMove.row<<bestMove.col<<endl ;
+			std::cout<<"\nComputers move\t"<<endl;//bestMove.row<<bestMove.col<<endl ;
             showBoard(board) ;
             if(gameOver(board) )
             {
-                std::cout<<player<<" HAS WON THE GAME \n" ;
+                std::cout<<player<<"--COMPUTER HAS WON THE GAME \n" ;
                 break ;
             }
             flag = 1 ;
@@ -347,7 +336,7 @@ int main()
             showBoard(board) ;
             if(gameOver(board) )
             {
-                std::cout<<opponent<<" HAS WON THE GAME \n" ;
+                std::cout<<opponent<<"--HUMAN HAS WON THE GAME \n" ;
                 break ;
             }
             flag = 0 ;
